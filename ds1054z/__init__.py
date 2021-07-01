@@ -31,7 +31,7 @@ class DS1054Z(vxi11.Instrument):
     :ivar firmware: e.g. ``'00.04.03.SP1'``
     """
 
-    IDN_PATTERN = r'^RIGOL TECHNOLOGIES,DS1\d\d\dZ( Plus)?,'
+    IDN_PATTERN = r'^RIGOL TECHNOLOGIES,(DS1\d\d\dZ( Plus)?|MSO4\d\d\d),'
     ENCODING = 'utf-8'
     H_GRID = 12
     SAMPLES_ON_DISPLAY = 1200
@@ -68,6 +68,7 @@ class DS1054Z(vxi11.Instrument):
         self.possible_memory_depth_values = (12000, 120000, 1200000, 12000000, 24000000,
                                               6000,  60000,  600000,  6000000, 12000000,
                                               3000,  30000,  300000,  3000000,  6000000)
+        self.mso = self.product.startswith('MSO')
 
     def clock(self):
         return clock() - self.start
@@ -624,7 +625,11 @@ class DS1054Z(vxi11.Instrument):
         The bitmap bytes of the current screen content.
         This property will be updated every time you access it.
         """
-        self.write(":DISPlay:DATA? ON,OFF,PNG")
+        if self.mso:
+            # MSO does not seem to handle parameters
+            self.write(":DISPlay:DATA?")
+        else:
+            self.write(":DISPlay:DATA? ON,OFF,PNG")
         logger.info("Receiving screen capture...")
         buff = self.read_raw(self.DISPLAY_DATA_BYTES)
         logger.info("read {0} bytes in .display_data".format(len(buff)))
