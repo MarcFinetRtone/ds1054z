@@ -286,7 +286,10 @@ def main():
         if not ext: parser.error('could not detect the image file type extension from the filename')
         # getting and saving the image
         im = Image.open(io.BytesIO(ds.display_data))
-        overlay_filename = pkg_resources.resource_filename("ds1054z","resources/overlay.png")
+        overlay_resource = "resources/overlay.png"
+        if ds.product.startswith('MSO'):
+            overlay_resource = "resources/overlay-mso.png"
+        overlay_filename = pkg_resources.resource_filename("ds1054z", overlay_resource)
         overlay = Image.open(overlay_filename)
         alpha_100_percent =  Image.new(overlay.mode, overlay.size, color=(0,0,0,0))
         overlay = Image.blend(alpha_100_percent, overlay, args.overlay)
