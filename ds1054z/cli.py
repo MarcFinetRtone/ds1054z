@@ -103,6 +103,8 @@ def main():
         help='The filename template for the image')
     save_screen_parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5,
         help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
+    save_screen_parser.add_argument('--invert', action='store_true',
+        help="Invert the image")
     save_screen_parser.add_argument('--printable', '-p', action='store_true',
         help='Make the screenshot more printer-friendly')
     # ds1054z save-data
@@ -300,6 +302,8 @@ def main():
             im = im.point(lambda x: x if x<252 else 255)
         else:
             im = im.convert('RGB')
+            if args.invert:
+                im = ImageOps.invert(im)
         im.save(filename, format=ext[1:])
         if not args.verbose: print(filename)
         else: print("Saved file: " + filename)
