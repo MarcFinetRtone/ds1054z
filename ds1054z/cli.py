@@ -14,11 +14,12 @@ import textwrap
 import logging
 import time
 import io
-import pkg_resources
 import sys
 import os
 import itertools
 import errno
+import importlib.resources
+import importlib.metadata
 
 from ds1054z import DS1054Z
 
@@ -172,7 +173,7 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print(pkg_resources.get_distribution("ds1054z").version)
+        print(importlib.metadata.version("ds1054z"))
         sys.exit(0)
 
     if args.debug:
@@ -289,8 +290,9 @@ def main():
         overlay_resource = "resources/overlay.png"
         if ds.product.startswith('MSO'):
             overlay_resource = "resources/overlay-mso.png"
-        overlay_filename = pkg_resources.resource_filename("ds1054z", overlay_resource)
-        overlay = Image.open(overlay_filename)
+        with importlib.resources.path('ds1054z', overlay_resource) as path:
+            overlay = Image.open(path)
+        #overlay_filename = pkg_resources.resource_filename("ds1054z", overlay_resource)
         alpha_100_percent =  Image.new(overlay.mode, overlay.size, color=(0,0,0,0))
         overlay = Image.blend(alpha_100_percent, overlay, args.overlay)
         im.putalpha(255)
